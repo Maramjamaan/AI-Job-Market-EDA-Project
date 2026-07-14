@@ -100,4 +100,4 @@ Data Scientist · Tuwaiq Academy Data Science & AI Bootcamp — Unit 3 Final Pro
 
 ## License
 
-This project was built for educational and portfolio purposes. Add a license of your choice (e.g. MIT) if you plan to accept external contributions.
+This project was built for educational and portfolio purposes.
