@@ -11,9 +11,9 @@ st.set_page_config(
 )
 
 # =======================================================================
-# THEME — same design system as the retail dashboard template: one clean
-# light palette, indigo accent, Untitled-UI-style colorway. Color still
-# encodes data lineage: indigo = real / observed data, amber = projected.
+# THEME — one clean light palette, indigo accent, Untitled-UI-style
+# colorway. Color still encodes data lineage: indigo = real / observed
+# data, amber = projected.
 # =======================================================================
 THEME = {
     "bg": "#F7F8FB",
@@ -54,6 +54,20 @@ def inject_css(t):
     }}
     section[data-testid="stSidebar"] .block-container {{ padding-top: 1.4rem; }}
 
+    /* Sidebar page nav */
+    div[data-testid="stRadio"] > label {{ display: none; }}
+    div[data-testid="stRadio"] > div {{ gap: 2px; }}
+    div[data-testid="stRadio"] label {{
+        padding: 8px 10px;
+        border-radius: 8px;
+        width: 100%;
+    }}
+    div[data-testid="stRadio"] label p {{
+        font-size: 0.92rem !important;
+        font-weight: 500 !important;
+    }}
+    div[data-testid="stRadio"] label:hover {{ background: {t['surface_2']}; }}
+
     /* ---------- Hero ---------- */
     .eyebrow {{
         color: {t['accent']};
@@ -73,11 +87,6 @@ def inject_css(t):
         color: {t['subtext']};
         font-size: 0.95rem;
         margin-bottom: 18px;
-    }}
-    .meta-line {{
-        color: {t['subtext']};
-        font-size: 0.82rem;
-        margin-bottom: 14px;
     }}
     .link-pill {{
         display: inline-flex;
@@ -123,6 +132,13 @@ def inject_css(t):
         font-size: 1.05rem;
         color: {t['text']};
     }}
+    .page-title {{
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: {t['text']};
+        margin: 4px 0 2px 0;
+    }}
+    .page-sub {{ color: {t['subtext']}; font-size: 0.9rem; margin-bottom: 16px; }}
 
     /* ---------- Metric / KPI cards ---------- */
     div[data-testid="stMetric"] {{
@@ -139,6 +155,10 @@ def inject_css(t):
     div[data-testid="stMetricValue"] {{
         color: {t['text']} !important;
         font-weight: 700 !important;
+        font-size: 1.5rem !important;
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.25 !important;
     }}
 
     /* ---------- Native bordered containers used as cards ---------- */
@@ -146,25 +166,6 @@ def inject_css(t):
         border-radius: 14px !important;
         border-color: {t['border']} !important;
         background: {t['surface']};
-    }}
-
-    /* ---------- Tabs ---------- */
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 4px;
-        border-bottom: 1px solid {t['border']};
-    }}
-    .stTabs [data-baseweb="tab"] {{
-        background: transparent;
-        color: {t['subtext']};
-        font-weight: 500;
-        padding: 9px 16px;
-    }}
-    .stTabs [aria-selected="true"] {{
-        color: {t['accent']} !important;
-        font-weight: 600 !important;
-    }}
-    .stTabs [data-baseweb="tab-highlight"] {{
-        background-color: {t['accent']} !important;
     }}
 
     /* ---------- Insight callouts ---------- */
@@ -278,6 +279,13 @@ def section_head(eyebrow_text, title_text):
     )
 
 
+def page_head(title_text, sub_text):
+    st.markdown(
+        f'<div class="page-title">{title_text}</div><div class="page-sub">{sub_text}</div>',
+        unsafe_allow_html=True,
+    )
+
+
 def lineage_legend():
     st.markdown(
         '<span class="badge badge-real"><span class="dot"></span>REAL DATA · 2020–2023</span>'
@@ -311,22 +319,27 @@ def load_data():
 df = load_data()
 
 # =======================================================================
-# SIDEBAR — identity + description + filters
+# SIDEBAR — identity, page navigation, filters
 # =======================================================================
 with st.sidebar:
     st.markdown('<div class="eyebrow">Maram Alzahrani</div>', unsafe_allow_html=True)
     st.markdown(
-        f'<div style="font-weight:700; font-size:1.05rem; margin-bottom:14px; color:{T["text"]};">'
+        f'<div style="font-weight:700; font-size:1.05rem; margin-bottom:16px; color:{T["text"]};">'
         'AI Job Market Dashboard</div>',
         unsafe_allow_html=True,
     )
 
-    st.markdown("##### About this dataset")
-    st.write(
-        f"**{len(df):,}** AI/data job postings collected globally, 2020–2026."
+    st.markdown('<div class="eyebrow">Navigate</div>', unsafe_allow_html=True)
+    page = st.radio(
+        "Navigate", ["Overview", "Deep Dive", "Insights"],
+        label_visibility="collapsed",
     )
+
+    st.markdown("---")
+    st.markdown("##### About this dataset")
+    st.write(f"**{len(df):,}** AI/data job postings collected globally, 2020–2026.")
     lineage_legend()
-    st.caption("Projected years follow the shape of the real trend rather than a random jump — see the Trends tab.")
+    st.caption("Projected years follow the shape of the real trend rather than a random jump — see Deep Dive.")
 
     st.markdown("---")
     st.markdown("##### Filters")
@@ -379,50 +392,88 @@ if filtered_df.empty:
 st.markdown(
     '<div class="eyebrow">Portfolio Project · Exploratory Data Analysis</div>'
     '<div class="hero-title">AI Job Market Salary Dashboard</div>'
-    '<div class="hero-sub">How pay, demand, and role types have shifted across the global AI and '
-    'data job market — blending real postings with a transparent, trend-based projection for the '
-    'years ahead. Use the filters in the sidebar to narrow the data.</div>',
+    '<div class="hero-sub">A full picture of the global AI and data job market — who is posting, '
+    'where, and in what roles — not just what they pay, blended with a transparent, '
+    'trend-based projection for the years ahead.</div>',
     unsafe_allow_html=True,
 )
 
 # =======================================================================
-# TABS
+# PAGE 1 — OVERVIEW: a broad snapshot across every dimension, not just salary
 # =======================================================================
-tab_overview, tab_pay, tab_trends, tab_roles, tab_worklife, tab_insights = st.tabs(
-    ["Overview", "Compensation", "Trends & Projections", "Roles & Skills",
-     "Work Style & Risk", "Insights"]
-)
+if page == "Overview":
+    page_head("Overview", "The shape of the market: where the postings are, not only what they pay")
 
-# ---------- OVERVIEW ----------
-with tab_overview:
     with st.container(border=True):
         section_head("Snapshot", "Filtered market at a glance")
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Average salary", f"${filtered_df['salary_usd'].mean():,.0f}")
-        c2.metric("Median salary", f"${filtered_df['salary_usd'].median():,.0f}")
-        c3.metric("Highest salary", f"${filtered_df['salary_usd'].max():,.0f}")
-        c4.metric("Postings shown", f"{len(filtered_df):,}")
+        c1.metric("Postings shown", f"{len(filtered_df):,}")
+        c2.metric("Average salary", f"${filtered_df['salary_usd'].mean():,.0f}")
+        c3.metric("Regions covered", f"{filtered_df['region'].nunique()}")
+        c4.metric("Top role category", filtered_df["ai_role_category"].mode().iloc[0])
 
     st.write("")
-    with st.container(border=True):
-        col1, col2 = st.columns([1.3, 1])
-        with col1:
+    col1, col2 = st.columns(2)
+    with col1:
+        with st.container(border=True):
+            region_counts = filtered_df["region"].value_counts().sort_values().reset_index()
+            region_counts.columns = ["region", "count"]
+            fig = px.bar(region_counts, x="count", y="region", orientation="h",
+                         title="Postings by Region")
+            st.plotly_chart(style_fig(fig, T), use_container_width=True)
+    with col2:
+        with st.container(border=True):
+            exp_order = ["Entry Level", "Mid Level", "Senior", "Executive"]
+            avail = [e for e in exp_order if e in filtered_df["experience_level"].unique()]
+            exp_counts = filtered_df["experience_level"].value_counts().reindex(avail).reset_index()
+            exp_counts.columns = ["experience_level", "count"]
+            fig = px.bar(exp_counts, x="experience_level", y="count",
+                         title="Postings by Experience Level")
+            st.plotly_chart(style_fig(fig, T), use_container_width=True)
+
+    col3, col4 = st.columns(2)
+    with col3:
+        with st.container(border=True):
+            work_counts = filtered_df["remote_type"].value_counts().reset_index()
+            work_counts.columns = ["remote_type", "count"]
+            fig = px.bar(work_counts, x="remote_type", y="count", title="Postings by Work Type")
+            st.plotly_chart(style_fig(fig, T), use_container_width=True)
+    with col4:
+        with st.container(border=True):
+            role_counts = filtered_df["ai_role_category"].value_counts().sort_values().reset_index()
+            role_counts.columns = ["ai_role_category", "count"]
+            fig = px.bar(role_counts, x="count", y="ai_role_category", orientation="h",
+                         title="Postings by AI Role Category")
+            st.plotly_chart(style_fig(fig, T, height=420), use_container_width=True)
+
+    col5, col6 = st.columns(2)
+    with col5:
+        with st.container(border=True):
+            top_industries = filtered_df["industry"].value_counts().head(8).reset_index()
+            top_industries.columns = ["industry", "count"]
+            fig = px.bar(top_industries, x="industry", y="count", title="Top 8 Industries by Job Count")
+            fig.update_xaxes(tickangle=-30)
+            st.plotly_chart(style_fig(fig, T), use_container_width=True)
+    with col6:
+        with st.container(border=True):
             fig = px.histogram(filtered_df, x="salary_usd", nbins=30, marginal="box",
                                 title="Salary Distribution")
             fig.update_xaxes(title="Salary (USD)")
             st.plotly_chart(style_fig(fig, T), use_container_width=True)
-        with col2:
-            counts = filtered_df["experience_level"].value_counts().reset_index()
-            counts.columns = ["experience_level", "count"]
-            fig = px.bar(counts, x="experience_level", y="count", title="Postings by Experience Level")
-            st.plotly_chart(style_fig(fig, T), use_container_width=True)
-        mini_insight("Most salaries cluster between $100K–$200K with a right-skewed tail, "
-                     "and Senior-level postings make up the largest share of the market.")
 
-# ---------- COMPENSATION ----------
-with tab_pay:
+    mini_insight("Technology-sector, North-America-based, Senior-level postings dominate the "
+                 "raw volume of listings — worth keeping in mind when reading averages elsewhere "
+                 "in the dashboard, since smaller categories carry less statistical weight.")
+
+# =======================================================================
+# PAGE 2 — DEEP DIVE: every detailed / comparative chart, one page, sectioned
+# =======================================================================
+elif page == "Deep Dive":
+    page_head("Deep Dive", "Compensation, trends, roles, and work style — all in one place")
+
+    # ---------- Compensation ----------
     with st.container(border=True):
-        section_head("Compensation", "What drives the salary spread")
+        section_head("Salary Breakdown", "What drives the salary spread")
         col1, col2 = st.columns(2)
         with col1:
             exp_order = ["Entry Level", "Mid Level", "Senior", "Executive"]
@@ -453,8 +504,8 @@ with tab_pay:
                      "gap is the widest split in the whole dataset, and company size mainly matters "
                      "at the Entry, Senior, and Executive levels.")
 
-# ---------- TRENDS & PROJECTIONS ----------
-with tab_trends:
+    st.write("")
+    # ---------- Trends & Projections ----------
     with st.container(border=True):
         section_head("Trends & projections", "Real data vs. trend-based projection")
         lineage_legend()
@@ -489,8 +540,8 @@ with tab_trends:
                      "trend rather than jumping randomly, which makes the projection look reasonable "
                      "rather than arbitrary.")
 
-# ---------- ROLES & SKILLS ----------
-with tab_roles:
+    st.write("")
+    # ---------- Roles & Skills ----------
     with st.container(border=True):
         section_head("Roles & skills", "Where the specialization premium shows up")
         col1, col2 = st.columns(2)
@@ -498,25 +549,20 @@ with tab_roles:
             role_avg = filtered_df.groupby("ai_role_category")["salary_usd"].mean().sort_values().reset_index()
             fig = px.bar(role_avg, x="salary_usd", y="ai_role_category", orientation="h",
                           title="Average Salary by AI Role Category")
-            st.plotly_chart(style_fig(fig, T, height=460), use_container_width=True)
+            st.plotly_chart(style_fig(fig, T, height=420), use_container_width=True)
         with col2:
             tools = filtered_df["ai_tools_required"].str.split(",").explode().str.strip()
             top_tools = tools.value_counts().head(10).sort_values().reset_index()
             top_tools.columns = ["tool", "count"]
             fig = px.bar(top_tools, x="count", y="tool", orientation="h",
                           title="Top 10 Most Required AI Tools/Skills")
-            st.plotly_chart(style_fig(fig, T, height=460), use_container_width=True)
-
-        top_industries = filtered_df["industry"].value_counts().head(8).reset_index()
-        top_industries.columns = ["industry", "count"]
-        fig = px.bar(top_industries, x="industry", y="count", title="Top 8 Industries by Job Count")
-        st.plotly_chart(style_fig(fig, T), use_container_width=True)
+            st.plotly_chart(style_fig(fig, T, height=420), use_container_width=True)
 
         mini_insight("NLP/LLM roles pay roughly 3x more than Data Analytics roles, and Python, SQL, "
                      "and dbt are the most frequently required skills across postings.")
 
-# ---------- WORK STYLE & RISK ----------
-with tab_worklife:
+    st.write("")
+    # ---------- Work Style & Risk ----------
     with st.container(border=True):
         section_head("Work style & risk", "Remote flexibility and automation exposure")
         col1, col2 = st.columns(2)
@@ -535,14 +581,18 @@ with tab_worklife:
         remote_counts = filtered_df["remote_type"].value_counts().reset_index()
         remote_counts.columns = ["remote_type", "count"]
         fig = px.pie(remote_counts, names="remote_type", values="count", hole=0.55,
-                      title="Work Type Split", color_discrete_sequence=COLORWAY)
+                      title="Work Type Split")
         st.plotly_chart(style_fig(fig, T, height=360), use_container_width=True)
 
         mini_insight("AI disruption risk shows no strong link to salary — pay looks tied more to skill "
                      "and role than to how automatable a job is.")
 
-# ---------- INSIGHTS ----------
-with tab_insights:
+# =======================================================================
+# PAGE 3 — INSIGHTS & PREDICTOR
+# =======================================================================
+else:
+    page_head("Insights", "Key takeaways from the analysis")
+
     with st.container(border=True):
         section_head("Insights", "Key takeaways")
         st.caption("Grouped by theme so the headline finding is easy to scan, with the supporting detail right after it.")
