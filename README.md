@@ -2,9 +2,7 @@
 
 An interactive Streamlit dashboard exploring how pay, demand, and role types have shifted across the global AI and data job market from 2020 to 2026 — blending real job postings with a transparent, trend-based projection for the years ahead.
 
-**Live demo:** _add your deployed Streamlit app link here_
-
----
+**Live demo:** https://share.streamlit.io/-/auth/app?redirect_uri=https%3A%2F%2Fai-job-market-eda.streamlit.app%2F---
 
 ## Overview
 
@@ -102,4 +100,4 @@ Data Scientist · Tuwaiq Academy Data Science & AI Bootcamp — Unit 3 Final Pro
 
 ## License
 
-This project was built for educational and portfolio purposes. Add a license of your choice (e.g. MIT) if you plan to accept external contributions.
+This project was built for educational and portfolio purposes.
