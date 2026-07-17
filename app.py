@@ -16,18 +16,18 @@ st.set_page_config(
 # data, amber = projected.
 # =======================================================================
 THEME = {
-    "bg": "#F7F8FB",
-    "surface": "#FFFFFF",
-    "surface_2": "#F0F2F7",
-    "border": "#E4E7EC",
-    "text": "#101828",
-    "subtext": "#667085",
-    "accent": "#4F46E5",        # indigo — real / observed data
-    "accent2": "#F79009",       # amber — extrapolated / projected data
-    "accent_soft": "rgba(79,70,229,0.10)",
-    "plotly_template": "plotly_white",
+    "bg": "#0D0F17",
+    "surface": "#161925",
+    "surface_2": "#1E2233",
+    "border": "#2B3044",
+    "text": "#F2F4F8",
+    "subtext": "#9AA1B5",
+    "accent": "#818CF8",        # indigo — real / observed data
+    "accent2": "#FDB022",       # amber — extrapolated / projected data
+    "accent_soft": "rgba(129,140,248,0.15)",
+    "plotly_template": "plotly_dark",
 }
-COLORWAY = ["#4F46E5", "#0BA5EC", "#F79009", "#12B76A", "#EE46BC", "#667085"]
+COLORWAY = ["#818CF8", "#38BDF8", "#FDB022", "#34D399", "#F472B6", "#9AA1B5"]
 HEATMAP_SCALE = [[0, THEME["surface_2"]], [1, THEME["accent"]]]
 T = THEME  # short alias used throughout
 
@@ -244,6 +244,19 @@ def inject_css(t):
     }}
     div[data-testid="stSlider"] > div > div > div > div {{
         background-color: {t['accent']} !important;
+    }}
+    /* value bubble shown above each slider thumb — no filled box, just text */
+    div[data-testid="stSlider"] [data-testid="stThumbValue"] {{
+        background: transparent !important;
+        color: {t['text']} !important;
+        box-shadow: none !important;
+        font-weight: 600 !important;
+    }}
+    /* min/max tick labels at the ends of the slider track */
+    div[data-testid="stSlider"] [data-testid="stTickBarMin"],
+    div[data-testid="stSlider"] [data-testid="stTickBarMax"] {{
+        color: {t['subtext']} !important;
+        background: transparent !important;
     }}
     </style>
     """, unsafe_allow_html=True)
